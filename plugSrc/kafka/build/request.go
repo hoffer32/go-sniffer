@@ -1,7 +1,6 @@
 package build
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"time"
@@ -46,7 +45,7 @@ type ProduceReqPartition struct {
 	Messages []*Message
 }
 
-func ReadProduceRequest(r io.Reader, version int16) string {
+func ReadProduceRequest(r io.Reader, version int16) *ProduceReq {
 	// version == 1
 
 	produceReq := ProduceReq{}
@@ -76,11 +75,7 @@ func ReadProduceRequest(r io.Reader, version int16) string {
 		}
 	}
 
-	msg, err := json.Marshal(produceReq)
-	if err != nil {
-		fmt.Printf("marshal produceReq failed, err: %+v", err)
-	}
-	return string(msg)
+	return &produceReq
 }
 
 type ProduceRspPartitions struct {
@@ -99,7 +94,7 @@ type ProduceRsp struct {
 	Topics []ProduceRspTopic
 }
 
-func ReadProduceResponse(r io.Reader, version int16) string {
+func ReadProduceResponse(r io.Reader, version int16) *ProduceRsp {
 	// version == 1
 	produceRsp := ProduceRsp{}
 	l := ReadInt32(r)
@@ -118,18 +113,14 @@ func ReadProduceResponse(r io.Reader, version int16) string {
 		}
 		produceRsp.Topics = append(produceRsp.Topics, topic)
 	}
-	bs, err := json.Marshal(produceRsp)
-	if err != nil {
-		fmt.Printf("marshal produceRsp failed, err: %+v", err)
-	}
-	return string(bs)
+	return &produceRsp
 }
 
 type MetadataReq struct {
 	TopicNames []string
 }
 
-func ReadMetadataRequest(r io.Reader, version int16) string {
+func ReadMetadataRequest(r io.Reader, version int16) *MetadataReq {
 	// version == 0
 	metadataReq := MetadataReq{}
 
@@ -139,11 +130,7 @@ func ReadMetadataRequest(r io.Reader, version int16) string {
 		metadataReq.TopicNames = append(metadataReq.TopicNames, topicName)
 	}
 
-	bs, err := json.Marshal(metadataReq)
-	if err != nil {
-		fmt.Printf("marshal metadataReq failed, err: %+v", err)
-	}
-	return string(bs)
+	return &metadataReq
 }
 
 type Broker struct {
@@ -171,7 +158,7 @@ type MetadataRsp struct {
 	Topics  []TopicMetadata
 }
 
-func ReadMetadataResponse(r io.Reader, version int16) string {
+func ReadMetadataResponse(r io.Reader, version int16) *MetadataRsp {
 	// version == 0
 	metadataRsp := MetadataRsp{}
 
@@ -217,16 +204,12 @@ func ReadMetadataResponse(r io.Reader, version int16) string {
 		metadataRsp.Topics = append(metadataRsp.Topics, topicMetadata)
 	}
 
-	bs, err := json.Marshal(metadataRsp)
-	if err != nil {
-		fmt.Printf("marshal metadataRsp failed, err: %+v", err)
-	}
-	return string(bs)
+	return &metadataRsp
 }
 
 type Action struct {
 	Request    string
 	Direction  string
 	ApiVersion int16
-	Content    string
+	Message    interface{}
 }

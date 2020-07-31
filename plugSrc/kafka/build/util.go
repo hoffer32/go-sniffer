@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"strconv"
 	"time"
 )
 
@@ -114,6 +115,8 @@ func ReadBytes(r io.Reader) []byte {
 
 func ReadMessages(r io.Reader, version int16) []*Message {
 	switch version {
+	case 0:
+		return ReadMessagesV1(r)
 	case 1:
 		return ReadMessagesV1(r)
 	}
@@ -145,4 +148,11 @@ func ReadMessagesV1(r io.Reader) []*Message {
 		messages = append(messages, &message)
 	}
 	return messages
+}
+
+func GetRquestName(apiKey int16) string {
+	if name, ok := RquestNameMap[apiKey]; ok {
+		return name
+	}
+	return strconv.Itoa(int(apiKey))
 }

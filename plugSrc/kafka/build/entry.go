@@ -236,9 +236,14 @@ func (stm *stream) resolve() {
 }
 
 func (stm *stream) resolveServerPacket(pk *packet, rh requestHeader) {
-	var msg string
+	var msg interface{}
 	payload := pk.payload
 
+	action := Action{
+		Request:    GetRquestName(pk.apiKey),
+		Direction:  "isServer",
+		ApiVersion: pk.apiVersion,
+	}
 	switch int(rh.apiKey) {
 	case ProduceRequest:
 		msg = ReadProduceResponse(payload, rh.apiVersion)
@@ -248,13 +253,23 @@ func (stm *stream) resolveServerPacket(pk *packet, rh requestHeader) {
 		fmt.Printf("response ApiKey:%d TODO", rh.apiKey)
 	}
 
-	if len(msg) > 0 {
-		fmt.Printf("response ApiKey:%d, ApiVersion: %d, message:%s\n", rh.apiKey, rh.apiVersion, msg)
+	if msg != nil {
+		action.Message = msg
 	}
+	bs, err := json.Marshal(action)
+	if err != nil {
+		fmt.Printf("json marshal action failed, err: %+v\n", err)
+	}
+	fmt.Printf("%s\n", string(bs))
 }
 
 func (stm *stream) resolveClientPacket(pk *packet) {
-	var msg string
+	var msg interface{}
+	action := Action{
+		Request:    GetRquestName(pk.apiKey),
+		Direction:  "isClient",
+		ApiVersion: pk.apiVersion,
+	}
 	payload := pk.payload
 	switch int(pk.apiKey) {
 	case ProduceRequest:
@@ -265,17 +280,12 @@ func (stm *stream) resolveClientPacket(pk *packet) {
 		fmt.Printf("ApiKey:%d TODO", pk.apiKey)
 	}
 
-	if len(msg) > 0 {
-		action := Action{
-			Request:    RquestNameMap[pk.apiKey],
-			Direction:  "isClient",
-			ApiVersion: pk.apiVersion,
-			Content:    msg,
-		}
-		bs, err := json.Marshal(action)
-		if err != nil {
-			fmt.Printf("json marshal action failed, err: %+v\n", err)
-		}
-		fmt.Printf("%s\n", string(bs))
+	if msg != nil {
+		action.Message = msg
 	}
+	bs, err := json.Marshal(action)
+	if err != nil {
+		fmt.Printf("json marshal action failed, err: %+v\n", err)
+	}
+	fmt.Printf("%s\n", string(bs))
 }
