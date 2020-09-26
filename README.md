@@ -1,14 +1,13 @@
 
 # go-sniffer
 
-> 捕获mysql,redis,http,mongodb等协议...完善中
-> - 抓取项目中的数据库请求，如:执行的mysql查询语句
-> - 不需要修改项目代码，通过指定端口抓包解析协议
-> - 快速预览项目中所有的数据请求,便于程序调试
+> Capture mysql,redis,http,mongodb etc protocol...
+> 抓包截取项目中的数据库请求并解析成相应的语句，如mysql协议会解析为sql语句,便于调试。
+> 不要修改代码，直接嗅探项目中的数据请求。
 
 [![GitHub license](https://img.shields.io/github/license/40t/go-sniffer.svg?style=popout-square)](https://github.com/40t/go-sniffer/blob/master/LICENSE)
 
-
+#### [中文使用说明](#中文使用说明)
 
 ## Support List:
 - [mysql](#mysql)
@@ -24,25 +23,55 @@ $ go-sniffer en0 mysql
 ```
 ![image](https://github.com/40t/go-sniffer/raw/master/images/demo.gif)
 ## Setup:
-- 支持 : `MacOS` `Linux` `Unix`
-- 不支持 : `windows`
-- 依赖:`google/gopacket`库
+- support : `MacOS` `Linux` `Unix`
+- not support : `windows`
+- If you encounter problems in the `go get` process, try upgrading the go version （如果go get 过程中遇到问题，请尝试升级go版本）
 
-### 依赖库安装：Centos
+### Centos
 ``` bash
-$ yum install libcap-devel
+$ yum -y install libpcap-devel
 ```
-### 依赖库安装: Ubuntu
+### Ubuntu
 ``` bash
-$ apt-get install libcap-dev
+$ apt-get install libpcap-dev
+```
+### MacOs
+``` bash
+
 ```
 ### RUN
 ``` bash
-$ go get -v github.com/40t/go-sniffer
-$ cd $(go env GOPATH)/src/github.com/40t/go-sniffer
-$ go run main.go
+$ go get -v -u github.com/40t/go-sniffer
+$ cp -rf $(go env GOPATH)/bin/go-sniffer /usr/local/bin
+$ go-sniffer
 ```
 ## Usage:
+``` bash
+==================================================================================
+[Usage]
+
+    go-sniffer [device] [plug] [plug's params(optional)]
+
+    [Example]
+          go-sniffer en0 redis          Capture redis packet
+          go-sniffer en0 mysql -p 3306  Capture mysql packet
+
+    go-sniffer --[commend]
+               --help "this page"
+               --env  "environment variable"
+               --list "Plug-in list"
+               --ver  "version"
+               --dev  "device"
+    [Example]
+          go-sniffer --list "show all plug-in"
+
+==================================================================================
+[device] : lo0 :   127.0.0.1
+[device] : en0 : xx:xx:xx:xx:xx:xx  192.168.199.221
+==================================================================================
+```
+
+#### 中文使用说明
 ``` bash
 =======================================================================
 [使用说明]
@@ -69,34 +98,12 @@ $ go run main.go
 =======================================================================
 ```
 
-### mysql
-> 支持预处理语句等常大部分语句
+### Example:
 ``` bash
-$ go-sniffer [设备名] mysql [参数]
--p 置顶端口，默认3306
+$ go-sniffer lo0 mysql 
+$ go-sniffer en0 redis 
+$ go-sniffer eth0 http -p 8080
+$ go-sniffer eth1 mongodb
 ```
-![image](https://github.com/40t/go-sniffer/raw/master/images/mysql.gif)
-
-### redis
-``` bash
-$ go-sniffer [设备名] redis [参数]
--p 置顶端口，默认6379
-```
-![image](https://github.com/40t/go-sniffer/raw/master/images/redis.gif)
-
-### http
-``` bash
-$ go-sniffer [设备名] http [参数]
--p 置顶端口，默认80
-```
-![image](https://github.com/40t/go-sniffer/raw/master/images/http.gif)
-
-### mongodb
-``` bash
-$ go-sniffer [设备名] mongodb [参数]
--p 端口，默认27017
-```
-- 支持大部分语句，只有个别少数语句没有实现
-
 ## License:
 [MIT](http://opensource.org/licenses/MIT)

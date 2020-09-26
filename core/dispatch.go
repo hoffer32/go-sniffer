@@ -27,13 +27,14 @@ func NewDispatch(plug *Plug, cmd *Cmd) *Dispatch {
 
 func (d *Dispatch) Capture() {
 
-	// Init device
+	//init device
 	handle, err := pcap.OpenLive(d.device, 65535, false, pcap.BlockForever)
 	if err != nil {
+		log.Fatal(err)
 		return
 	}
 
-	// Set filter
+	//set filter
 	fmt.Println(d.Plug.BPF)
 	err = handle.SetBPFFilter(d.Plug.BPF)
 	if err != nil {
@@ -44,7 +45,7 @@ func (d *Dispatch) Capture() {
 	src := gopacket.NewPacketSource(handle, handle.LinkType())
 	packets := src.Packets() // get packet chan
 
-	// Set up assembly
+	//set up assembly
 	streamFactory := &ProtocolStreamFactory{
 		dispatch: d,
 	}
@@ -52,14 +53,14 @@ func (d *Dispatch) Capture() {
 	assembler := NewAssembler(streamPool)
 	ticker := time.Tick(time.Minute)
 
-	// Loop until ctrl+z
+	//loop until ctrl+z
 	for {
 		select {
 		case packet := <-packets:
 			if packet.NetworkLayer() == nil ||
 				packet.TransportLayer() == nil ||
 				packet.TransportLayer().LayerType() != layers.LayerTypeTCP {
-				fmt.Println("包不能解析")
+				fmt.Println("ERR : Unknown Packet -_-")
 				continue
 			}
 			tcp := packet.TransportLayer().(*layers.TCP)
@@ -92,7 +93,7 @@ func (m *ProtocolStreamFactory) New(net, transport gopacket.Flow) tcpassembly.St
 	}
 
 	//new stream
-	fmt.Println("# 新连接:", net, transport)
+	fmt.Println("# Start new stream:", net, transport)
 
 	//decode packet
 	go m.dispatch.Plug.ResolveStream(net, transport, &(stm.r))
